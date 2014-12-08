@@ -1,0 +1,43 @@
+/* CSS declarations go here */
+body {
+  font-family: sans-serif;
+  background-attachment: fixed;
+  font-size: 14px;
+}
+
+.container {
+  float:left
+  max-width: 400px;
+  margin: 0 auto;
+  min-height: 100%;
+  background: white;
+  font-size: x-small;
+  position: absolute;
+}
+
+.ct-chart {
+float:left
+max-width: 400px;
+margin: 50px auto;
+min-height: 100%;
+background: white;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  background: white;
+}
+
+li {
+  position: relative;
+  list-style: none;
+  padding: 5px;
+  border-bottom: #eee solid 1px;
+}
+
+@media (max-width: 600px) {
+  li {
+    padding: 12px 15px;
+  }
+}

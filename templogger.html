@@ -3,10 +3,10 @@
 </head>
 
 <body>
+<header>
+  <h1>Temp history:</h1>
+</header>
   <div class="container">
-    <header>
-      <h1>Temp history:</h1>
-    </header>
 
     <ul>
       {{#each dataPoints}}
@@ -14,8 +14,11 @@
       {{/each}}
     </ul>
   </div>
+
+    <div class="ct-chart ct-perfect-fourt"></div>
+
 </body>
 
 <template name="dataPoint">
-  <li> Temp: {{temp}} °C --- {{time}}</li>
+  <li> Temp: {{temp}} °C, {{time}} - Batt.: {{batt}}%</li>
 </template>

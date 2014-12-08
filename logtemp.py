@@ -35,23 +35,31 @@ def on_message(client, userdata, msg):
 
     dt = datetime.utcfromtimestamp(data['ts'] / 1000.).isoformat()
     del data['ts']
-    print('%s %s %s' % (msg.topic, json.dumps(data), dt))
+    #print('%s %s %s' % (msg.topic, json.dumps(data), dt))
 
     #temp.insert(data['temp'])
-    tempObj = {'time': dt, 'temp' : data['temp']}
-    print tempObj
-    temp.insert(tempObj)
-    #print('%s %s %s' % (msg.topic, dt, json.dumps(data)))
 
+    #print('%s %s %s' % (msg.topic, dt, json.dumps(data)))
+    try:
+        if 'temp' in data:
+            tempObj = {'time': dt, 'temp' : data['temp']}
+        if 'val' in data:
+            tempObj = {'time': dt, 'batt' : data['val']}
+        print tempObj
+        #inserts the new data to the db
+        temp.insert(tempObj)
+    except:
+        print "Oops!  Key not found"
+        print ('%s %s %s' % (msg.topic, dt, json.dumps(data)))
 
 def show_incoming_data():
 
     if (len(sys.argv) > 1):
         print 'ArgLength:', len(sys.argv)
-        print 'Arg 1:', sys.argv[1]
+        print 'DeviceID:', sys.argv[1]
         dev_id = sys.argv[1]
 
-    client = mqtt.Client(client_id="clientdd1")
+    client = mqtt.Client(client_id="danielM")
     client.on_connect = on_connect
     client.on_message = on_message
 
