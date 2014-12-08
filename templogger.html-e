@@ -1,0 +1,21 @@
+<head>
+  <title>Temperature logger v0.1</title>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Temp history:</h1>
+    </header>
+
+    <ul>
+      {{#each dataPoints}}
+        {{> dataPoint}}
+      {{/each}}
+    </ul>
+  </div>
+</body>
+
+<template name="dataPoint">
+  <li> Temp: {{temp}} °C --- {{createdAt}}</li>
+</template>
