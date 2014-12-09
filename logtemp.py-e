@@ -33,24 +33,24 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     data = json.loads(msg.payload)
 
-    dt = datetime.utcfromtimestamp(data['ts'] / 1000.).isoformat()
-    del data['ts']
+    #dt = datetime.utcfromtimestamp(data['ts'] / 1000.).isoformat()
+    #del data['ts']
     #print('%s %s %s' % (msg.topic, json.dumps(data), dt))
 
     #temp.insert(data['temp'])
-
+    timestamp = data['ts']
     #print('%s %s %s' % (msg.topic, dt, json.dumps(data)))
     try:
         if 'temp' in data:
-            tempObj = {'time': dt, 'temp' : data['temp']}
+            tempObj = {'time': timestamp, 'temp' : data['temp']}
         if 'val' in data:
-            tempObj = {'time': dt, 'batt' : data['val']}
+            tempObj = {'time': timestamp, 'batt' : data['val']}
         print tempObj
         #inserts the new data to the db
         temp.insert(tempObj)
     except:
         print "Oops!  Key not found"
-        print ('%s %s %s' % (msg.topic, dt, json.dumps(data)))
+        print ('%s %s %s' % (msg.topic, ts, json.dumps(data)))
 
 def show_incoming_data():
 
