@@ -8,18 +8,24 @@
   </header>
 
   <div class="container">
-
     <ul>
       {{#each dataPoints}}
         {{> dataPoint}}
       {{/each}}
     </ul>
-
   </div>
 
-  <div class="ct-chart ct-perfect-fourt"></div>
+
+    {{>chart}}
+
+
 
 </body>
+
+<template name ="chart">
+  {{getData}}
+  <div class="ct-chart ct-perfect-fourt"></div>
+</template>
 
 <template name="dataPoint">
   <li> Temp: {{temp}}°C, {{time}} - Batt.: {{batt}}%</li>

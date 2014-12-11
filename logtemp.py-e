@@ -6,16 +6,22 @@ import paho.mqtt.client as mqtt
 from requests import get
 from pymongo import MongoClient
 
-##Connection to the DB:
-client = MongoClient('mongodb://localhost:3001/') #created by Meteor
-#db to use
-db = client['meteor']
-
-#get a collection
-temp = db['temp']
-
+#globals:
 dev_id = "#"  #all if no argument is given (to check the broker healt)
+temp = 0
 
+def connect_mongo():
+    try:
+        ##Connection to the DB:
+        client = MongoClient('mongodb://localhost:3001/') #created by Meteor
+        #db to use
+        db = client['meteor']
+
+        #get a collection
+        global temp
+        temp = db['temp']
+    except:
+        print "Connection to the MongoDB refused, check that Meteor is running."
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -31,27 +37,31 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
+    tempObj = 0
     data = json.loads(msg.payload)
 
     #dt = datetime.utcfromtimestamp(data['ts'] / 1000.).isoformat()
     #del data['ts']
     #print('%s %s %s' % (msg.topic, json.dumps(data), dt))
-
     #temp.insert(data['temp'])
-    timestamp = data['ts']
     #print('%s %s %s' % (msg.topic, dt, json.dumps(data)))
     try:
+        timestamp = data['ts']
         if 'temp' in data:
             tempObj = {'time': timestamp, 'temp' : data['temp']}
         if 'val' in data:
             tempObj = {'time': timestamp, 'batt' : data['val']}
         print tempObj
         #inserts the new data to the db
-        temp.insert(tempObj)
     except:
         print "Oops!  Key not found"
-        print ('%s %s %s' % (msg.topic, ts, json.dumps(data)))
+        print ('%s %s' % (msg.topic, json.dumps(data)))
 
+    try:
+        global temp
+        temp.insert(tempObj)
+    except:
+        print "Connection to the MongoDB lost, check that Meteor is running"
 def show_incoming_data():
 
     if (len(sys.argv) > 1):
@@ -71,6 +81,9 @@ def show_incoming_data():
     client.tls_insecure_set(True)
 
     client.connect("mqtt.relayr.io", 8883, 60)
+
+    #Connect to the MongoDB
+    connect_mongo()
 
     try:
         client.loop_forever()

@@ -12,14 +12,70 @@ if (Meteor.isClient) {
 
   Meteor.subscribe("datapoints");
 
+  var data1 = temp.find({}, {sort: {_id: -1}});
+
+  window.data2 = data1.map(function (x) {
+    return [x.temp,x.time];
+  });
+
+  data2 = temp.find({}, {sort: {_id: -1}});
+  console.log(data1);
+  console.log("data2:"+data2);
+
   Template.body.helpers({
     dataPoints: function (){
         //return [{'temp':1, 'batt':2}, {'temp':4, 'batt':5}];
         //Note that Autopublish is disabled, so find({})
         //will return just the published by the server
-        return temp.find({}, {sort: {_id: -1}});
+        return data1;
     }
   });
+
+  Template.chart.helpers({
+    getData: function(){
+      var tempData;
+      Meteor.call("getDatapoints", function (error, result) {
+        var compactY =[];
+        result.forEach(function(item){
+          compactY.push(item[0]);
+        });
+        var compactX =[];
+        result.forEach(function(item){
+          compactX.push(item[1]);
+        });
+
+        tempData = {labels: [compactX.reverse()], series:[compactY.reverse()]};
+        new Chartist.Line('.ct-chart', tempData, chartOptions);
+} );
+    }
+  });
+
+  /*var tempData;
+  Meteor.call("getDatapoints", function (error, result) {
+    var compact =[];
+    result.forEach(function(item){
+      compact.push(item[0]);
+    });
+
+    tempData = {labels: ['1', '2'], series:[compact]};
+    console.log(tempData);
+    new Chartist.Line('.ct-chart', tempData, chartOptions);
+  } );*/
+
+  // Create a new line chart object where as first parameter we pass in a selector
+  // that is resolving to our chart container element. The Second parameter
+  // is the actual data object.
+
+
+
+    setInterval(function () {
+        //  new Chartist.Line('.ct-chart', tempData, chartOptions);
+          }, 300);
+
+//    setTimeout(function () {
+//      new Chartist.Line('.ct-chart', tempData);
+//    }, 300);
+//  }
 
   var chartOptions = {
     // Don't draw the line chart points
@@ -45,36 +101,13 @@ if (Meteor.isClient) {
       }
     }
   };
-
-  var tempData;
-  Meteor.call("getDatapoints", function (error, result) {
-    tempData = {labels: ['1', '2'], series:[result]};
-    console.log(tempData);
-  } );
-
-  // Create a new line chart object where as first parameter we pass in a selector
-  // that is resolving to our chart container element. The Second parameter
-  // is the actual data object.
-
-
-  Template.dataPoint.rendered = function(){
-    setTimeout(function () {
-          new Chartist.Line('.ct-chart', tempData, chartOptions);
-          }, 300);
-  };
-
-
-//    setTimeout(function () {
-//      new Chartist.Line('.ct-chart', tempData);
-//    }, 300);
-//  }
 }//isCLIENT
 
 Meteor.methods({
   getDatapoints: function() {
     var datapoints = temp.find({}, {sort: {_id: -1}, limit:25});
-    return datapoints.map(function (temp) {
-      return temp.temp;
+    return datapoints.map(function (x) {
+      return [x.temp,x.time];
     });
   }
 });
