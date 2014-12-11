@@ -13,14 +13,7 @@ if (Meteor.isClient) {
   Meteor.subscribe("datapoints");
 
   var data1 = temp.find({}, {sort: {_id: -1}});
-
-  window.data2 = data1.map(function (x) {
-    return [x.temp,x.time];
-  });
-
-  data2 = temp.find({}, {sort: {_id: -1}});
-  console.log(data1);
-  console.log("data2:"+data2);
+  var tempData;
 
   Template.body.helpers({
     dataPoints: function (){
@@ -32,8 +25,7 @@ if (Meteor.isClient) {
   });
 
   Template.chart.helpers({
-    getData: function(){
-      var tempData;
+    plotChart: function(){
       Meteor.call("getDatapoints", function (error, result) {
         var compactY =[];
         result.forEach(function(item){
@@ -41,47 +33,66 @@ if (Meteor.isClient) {
         });
         var compactX =[];
         result.forEach(function(item){
-          compactX.push(item[1]);
+          var t = new Date(item[1]);
+          compactX.push(t.getHours().toString()+':'+t.getMinutes().toString()
+                       +':'+t.getSeconds().toString());
         });
 
         tempData = {labels: [compactX.reverse()], series:[compactY.reverse()]};
-        new Chartist.Line('.ct-chart', tempData, chartOptions);
-} );
+      });
     }
-  });
+  });//chart helpers
 
-  /*var tempData;
-  Meteor.call("getDatapoints", function (error, result) {
-    var compact =[];
-    result.forEach(function(item){
-      compact.push(item[0]);
+  setInterval(function (){
+    new Chartist.Line('.ct-chart', tempData, chartOptions);
+
+    }, 300);
+
+
+  $(document).ready(function(){
+var $chart;
+var $toolTip;
+
+    $chart = $('.ct-chart');
+
+    $toolTip = $chart
+      .append('<div class="tooltip"></div>')
+      .find('.tooltip')
+      .hide();
+    $chart.on('mouseenter', '.ct-point', function() {
+      var $point = $(this),
+        value = $point.attr('ct:value'),
+        seriesName = $point.parent().attr('ct:series-name');
+      console.log('mouseenter');
+      //$point.animate({'stroke-width': '50px'}, 300, easeOutQuad);
+      $toolTip.html(seriesName + '<br>' + value).show();
     });
 
-    tempData = {labels: ['1', '2'], series:[compact]};
-    console.log(tempData);
-    new Chartist.Line('.ct-chart', tempData, chartOptions);
-  } );*/
+    $chart.on('mouseleave', '.ct-point', function() {
+      var $point = $(this);
+      console.log('mouseleave');
+      //$point.animate({'stroke-width': '20px'}, 300, easeOutQuad);
+      $toolTip.hide();
+    });
 
-  // Create a new line chart object where as first parameter we pass in a selector
-  // that is resolving to our chart container element. The Second parameter
-  // is the actual data object.
+    $chart.on('mousemove', function(event) {
+      $toolTip.css({
+        left: (event.offsetX || event.originalEvent.layerX) - $toolTip.width() / 2 - 10,
+        top: (event.offsetY || event.originalEvent.layerY) - $toolTip.height() - 40
+      });
+      console.log('mousemove');
+    });
 
+    console.log($chart);
+  });
 
-
-    setInterval(function () {
-        //  new Chartist.Line('.ct-chart', tempData, chartOptions);
-          }, 300);
-
-//    setTimeout(function () {
-//      new Chartist.Line('.ct-chart', tempData);
-//    }, 300);
-//  }
 
   var chartOptions = {
     // Don't draw the line chart points
     showPoint: true,
     // Disable line smoothing
-    lineSmooth: false,
+    lineSmooth: true,
+    showArea: true,
     // X-Axis specific configuration
     axisX: {
       // We can disable the grid for this axis
@@ -97,7 +108,7 @@ if (Meteor.isClient) {
       // used for the labels on each axis. Here we are converting the
       // values into million pound.
       labelInterpolationFnc: function(value) {
-        return '$' + value + 'm';
+        return value.toFixed(2)+'°C ';
       }
     }
   };

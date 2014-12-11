@@ -8,23 +8,21 @@
   </header>
 
   <div class="container">
-    <ul>
-      {{#each dataPoints}}
-        {{> dataPoint}}
-      {{/each}}
-    </ul>
-  </div>
-
-
+    <div class="history">
+      <ul>
+        {{#each dataPoints}}
+          {{> dataPoint}}
+        {{/each}}
+      </ul>
+    </div>
     {{>chart}}
-
-
+  </div>
 
 </body>
 
 <template name ="chart">
-  {{getData}}
-  <div class="ct-chart ct-perfect-fourt"></div>
+  {{plotChart}}
+  <div class="ct-chart ct-major-twelfth"></div>
 </template>
 
 <template name="dataPoint">

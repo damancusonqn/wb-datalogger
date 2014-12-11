@@ -6,32 +6,28 @@ body {
 }
 
 .container {
-  float:left
-  max-width: 400px;
-  margin: 0 auto;
-  min-height: 100%;
-  background: white;
-  font-size: x-small;
-  position: absolute;
+position:relative;
+width: 100%;
 }
 
-.graphdiv {
-  float:rigth
+.history {
+  float:left;
   max-width: 400px;
-  margin: 0 auto;
-  min-height: 100%;
   background: white;
   font-size: x-small;
-  position: absolute;
+  width:15%;
 }
 
 .ct-chart {
-float:left
-max-width: 400px;
-margin: 50px auto;
-min-height: 100%;
-background: white;
+  display: block;
+  position: relative;
+  width: auto !important;
+  min-width: 500px;
+  margin-left: 250px;
+  margin-right:50px;
 }
+
+
 
 ul {
   margin: 0;
