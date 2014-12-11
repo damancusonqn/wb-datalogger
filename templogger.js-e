@@ -4,7 +4,7 @@ temp = new Mongo.Collection("temp");
 if (Meteor.isServer) {
   Meteor.publish("datapoints", function () {
     //publish the last 25 values to the client
-    return temp.find({}, {sort: {_id: -1}, limit: 25});
+    return temp.find({}, {sort: {_id: -1}, limit: 50});
   });
 }
 
@@ -12,8 +12,9 @@ if (Meteor.isClient) {
 
   Meteor.subscribe("datapoints");
 
-  var data1 = temp.find({}, {sort: {_id: -1}});
+  var data1 = temp.find({}, {sort: {_id: -1}, limit: 25});
   var tempData;
+  var queryParams;
 
   Template.body.helpers({
     dataPoints: function (){
@@ -21,6 +22,30 @@ if (Meteor.isClient) {
         //Note that Autopublish is disabled, so find({})
         //will return just the published by the server
         return data1;
+    }
+  });
+
+  Template.body.events({
+    "keypress .nPoints input": function (event) {
+      //if ENTER pressed
+       if (event.which == 13){
+         var value = event.target.value;
+          queryParams.nPoints = value;
+          //console.log(value);
+      }
+    },
+    "keypress .yZoom input": function (event) {
+       if (event.which == 13){
+         var value = event.target.value;
+          queryParams.yZoom = value;
+          //console.log(value);
+      }
+    },
+    //TODO: check mousedown event, not firing
+    "mousedown .yZoom input": function (event) {
+         var value = event.target.value;
+          queryParams.yZoom = value;
+          console.log(value);
     }
   });
 
@@ -43,6 +68,8 @@ if (Meteor.isClient) {
     }
   });//chart helpers
 
+
+
   setInterval(function (){
     new Chartist.Line('.ct-chart', tempData, chartOptions);
 
@@ -63,14 +90,14 @@ var $toolTip;
       var $point = $(this),
         value = $point.attr('ct:value'),
         seriesName = $point.parent().attr('ct:series-name');
-      console.log('mouseenter');
+      //console.log('mouseenter');
       //$point.animate({'stroke-width': '50px'}, 300, easeOutQuad);
       $toolTip.html(seriesName + '<br>' + value).show();
     });
 
     $chart.on('mouseleave', '.ct-point', function() {
       var $point = $(this);
-      console.log('mouseleave');
+      //console.log('mouseleave');
       //$point.animate({'stroke-width': '20px'}, 300, easeOutQuad);
       $toolTip.hide();
     });
@@ -80,10 +107,10 @@ var $toolTip;
         left: (event.offsetX || event.originalEvent.layerX) - $toolTip.width() / 2 - 10,
         top: (event.offsetY || event.originalEvent.layerY) - $toolTip.height() - 40
       });
-      console.log('mousemove');
+      //console.log('mousemove');
     });
 
-    console.log($chart);
+    //console.log($chart);
   });
 
 
@@ -116,7 +143,7 @@ var $toolTip;
 
 Meteor.methods({
   getDatapoints: function() {
-    var datapoints = temp.find({}, {sort: {_id: -1}, limit:25});
+    var datapoints = temp.find({}, {sort: {_id: -1}, limit:50});
     return datapoints.map(function (x) {
       return [x.temp,x.time];
     });

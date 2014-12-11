@@ -13,6 +13,7 @@ width: 100%;
 .history {
   float:left;
   max-width: 400px;
+  max-height: 70%;
   background: white;
   font-size: x-small;
   width:15%;
@@ -27,7 +28,13 @@ width: 100%;
   margin-right:50px;
 }
 
-
+.form {
+  display: block;
+  position: relative;
+  min-width: 500px;
+  margin-left: 250px;
+  margin-right:50px;
+}
 
 ul {
   margin: 0;
