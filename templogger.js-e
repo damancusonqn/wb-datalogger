@@ -14,7 +14,7 @@ if (Meteor.isClient) {
 
   var data1 = temp.find({}, {sort: {_id: -1}, limit: 25});
   var tempData;
-  var queryParams;
+  var queryParams = {nPoints: 50, yZoom: "auto", since:"", until:"now"};
 
   Template.body.helpers({
     dataPoints: function (){
@@ -30,22 +30,23 @@ if (Meteor.isClient) {
       //if ENTER pressed
        if (event.which == 13){
          var value = event.target.value;
-          queryParams.nPoints = value;
+         queryParams.nPoints = value;
           //console.log(value);
-      }
+       }
     },
     "keypress .yZoom input": function (event) {
        if (event.which == 13){
          var value = event.target.value;
-          queryParams.yZoom = value;
-          //console.log(value);
-      }
+         queryParams.yZoom = value;
+       }
     },
-    //TODO: check mousedown event, not firing
     "mousedown .yZoom input": function (event) {
-         var value = event.target.value;
-          queryParams.yZoom = value;
-          console.log(value);
+        var value = event.target.value;
+        queryParams.yZoom = value;
+    },
+    "mousedown .nPoints input": function (event) {
+        var value = event.target.value;
+        queryParams.nPoints = value;
     }
   });
 
@@ -72,13 +73,12 @@ if (Meteor.isClient) {
 
   setInterval(function (){
     new Chartist.Line('.ct-chart', tempData, chartOptions);
-
     }, 300);
 
-
+    //TODO:fix tooltips (not rendering on top of the point)
   $(document).ready(function(){
-var $chart;
-var $toolTip;
+    var $chart;
+    var $toolTip;
 
     $chart = $('.ct-chart');
 
@@ -115,6 +115,7 @@ var $toolTip;
 
 
   var chartOptions = {
+    //low: 10,//lowerlimit
     // Don't draw the line chart points
     showPoint: true,
     // Disable line smoothing

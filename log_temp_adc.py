@@ -10,7 +10,8 @@ from influxdb import InfluxDBClient
 
 
 #globals:
-dev_id = "#"  #all if no argument is given (to check the broker healt)
+dev_id1 = "#"  #all if no argument is given (to check the broker healt)
+dev_id2 = "#"
 temp = 0
 influxClient = 0
 
@@ -21,11 +22,18 @@ user = 'python'
 password = 'qwe123'
 dbname = 'wunderbar'
 query = 'select column_one from foo;'
-json_body = [{
-    "name": "test",  #series (deviceID)
-    "columns": ["timestamp", "temp"],
+
+json_temp = [{
+    "name": "temp",  #series (deviceID)
+    "columns": ["timestamp", "value"],
     "points": [[0,0]]
 }]
+json_bridge = [{
+    "name": "bridge",  #series (deviceID)
+    "columns": ["timestamp", "value"],
+    "points": [[0,0]]
+}]
+
 
 #    print("Queying data: " + query)
 #    result = client.query(query)
@@ -61,9 +69,11 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    if (len(sys.argv) > 1):
-        dev_id = str(sys.argv[1])
-        client.subscribe("/v1/" + dev_id + "/#")
+    if len(sys.argv) > 1:
+        dev_id1 = str(sys.argv[1])
+        client.subscribe("/v1/" + dev_id1 + "/#")
+        if len(sys.argv) == 3:
+            dev_id2 = sys.argv[2]
     else:
         client.subscribe("/v1/#")
 
@@ -80,44 +90,61 @@ def on_message(client, userdata, msg):
 
     try:
         timestamp = data['ts']
+        #temperature
         if 'temp' in data:
-            tempObj = {'time': timestamp, 'temp' : data['temp']}
+            tempObj = {'time': timestamp,'type': 'temp', 'value' : data['temp']}
+
+        #battery    
         if 'val' in data:
-            tempObj = {'time': timestamp, 'batt' : data['val']}
-        print tempObj
-        #inserts the new data to the db
+            tempObj = {'time': timestamp,'type': 'batt', 'value' : data['val']} 
+
+        #up_ch_payload (Bridge raw data containing ADC value in [0])    
+        if 'up_ch_payload' in data:
+            tempObj = {'time': timestamp, 'type': 'adc', 'value' : data['up_ch_payload'][0]} 
+
+        #print data, type(data)
+
+        #print tempObj, type(tempObj) #a dictionary
+
     except:
         print "Oops!  Key not found"
         print ('%s %s' % (msg.topic, json.dumps(data)))
 
-    try:
-        global temp
-        temp.insert(tempObj)
-    except:
-        print "Connection to the MongoDB lost, check that Meteor is running"
-
-    #try:
-    #    json_body.points = [tempObj.temp, tempObj.batt]
-        json_body[0]['points'] = [[data['ts'],data['temp']]]
-        print("Write points: {0}".format(json_body))
-        influxClient.write_points(json_body)
-
+   # try:
+        #inserts the new data into the MongoDB
+    #    global temp
+    #    temp.insert(tempObj)
     #except:
-    #    print "Connection to the InfluxDB lost, check that the server is running", sys.exc_info()[0]
+    #    print "Connection to the MongoDB lost, check that Meteor is running", sys.exc_info()[0]
+
+    try:
+        #inserts new values into InfluxDB
+        #if 'temp' in data:
+        #    json_temp[0]['points'] = [[tempObj['time'], tempObj['value']]]
+        #    print("Write Temp: {0}".format(json_temp))
+        #    influxClient.write_points(json_temp)
+
+        if 'up_ch_payload' in data:            
+            json_bridge[0]['points'] = [[tempObj['time'], tempObj['value']]]
+            print("Write rawADC: {0}".format(json_bridge))
+            influxClient.write_points(json_bridge)   
+    
+    except:
+        print "Connection to the InfluxDB lost, check that the server is running...", sys.exc_info()[0]
 
 
 def show_incoming_data():
 
-    if (len(sys.argv) > 1):
+    if len(sys.argv) > 1:
         print 'ArgLength:', len(sys.argv)
         print 'DeviceID:', sys.argv[1]
-        dev_id = sys.argv[1]
+        dev_id1 = sys.argv[1]
 
     client = mqtt.Client(client_id="danielM")
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.username_pw_set("relayr", "TAH8PKXJjJFjv3Yh")
+    client.username_pw_set("relayr", "YOUR_PASSWORD")
 
     client.tls_set("/Users/dani/code/certs/relayr.crt")
     #client.tls_set("~/code/certs/relayr.crt", certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
