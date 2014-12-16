@@ -74,6 +74,8 @@ def on_connect(client, userdata, flags, rc):
         client.subscribe("/v1/" + dev_id1 + "/#")
         if len(sys.argv) == 3:
             dev_id2 = sys.argv[2]
+            client.subscribe("/v1/" + dev_id2 + "/#")
+
     else:
         client.subscribe("/v1/#")
 
@@ -119,10 +121,10 @@ def on_message(client, userdata, msg):
 
     try:
         #inserts new values into InfluxDB
-        #if 'temp' in data:
-        #    json_temp[0]['points'] = [[tempObj['time'], tempObj['value']]]
-        #    print("Write Temp: {0}".format(json_temp))
-        #    influxClient.write_points(json_temp)
+        if 'temp' in data:
+            json_temp[0]['points'] = [[tempObj['time'], tempObj['value']]]
+            print("Write Temp: {0}".format(json_temp))
+            influxClient.write_points(json_temp)
 
         if 'up_ch_payload' in data:            
             json_bridge[0]['points'] = [[tempObj['time'], tempObj['value']]]
