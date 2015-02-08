@@ -69,6 +69,11 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
+
+    #TODO: instead a fixed number of devices, a nice feature will be grab the devices ID from the
+    # InfluxDB, in some area where is possible to write it from the dashboard config
+    # (probably Graph name)
+
     if len(sys.argv) > 1:
         dev_id1 = str(sys.argv[1])
         client.subscribe("/v1/" + dev_id1 + "/#")
